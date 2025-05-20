@@ -1,8 +1,10 @@
 package chat
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"strings"
 )
 
 func StartServer(address string) {
@@ -11,7 +13,7 @@ func StartServer(address string) {
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		fmt.Errorf("Error creating TCP socket on %s!\n", address)
+		fmt.Errorf("Error creating TCP socket on %s: %v\n", address, err)
 	}
 	defer listener.Close()
 	fmt.Printf("Server running on %s\n", address)
@@ -28,6 +30,27 @@ func StartServer(address string) {
 }
 
 func handleConnection(conn net.Conn) {
+	defer conn.Close()
+	_, err := fmt.Fprintf(conn, "Please enter your username: ")
+	if err != nil {
+		fmt.Println("Error writing username prompt", err)
+	}
+
+	reader := bufio.NewReader(conn)
+	name, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Error reading username", err)
+	}
+
+	name = strings.TrimSpace(name)
+	fmt.Printf("%s has joined!\n", name)
 	fmt.Fprintf(conn, "Welcome to the chat!\n")
-	conn.Close()
+	for {
+		msg, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Printf("%s disconnected.\n", name)
+			return
+		}
+		fmt.Printf("[%s]: %s", name, msg)
+	}
 }
