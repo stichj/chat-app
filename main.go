@@ -1,9 +1,13 @@
 package main
 
 import (
-	chat "chat-server/server"
+	"chat-server/server"
+	"fmt"
 )
 
 func main() {
-	chat.StartServer("localhost:9000")
+	fmt.Println("[Main] Starting server...")
+	broker := server.NewBroker()
+	go broker.Start()
+	server.StartServer("localhost:9000", broker)
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func StartServer(address string) {
+func StartServer(address string, broker *Broker) {
 	fmt.Printf("Starting chat server on %s ...\n", address)
 
 	listener, err := net.Listen("tcp", address)
@@ -20,45 +20,59 @@ func StartServer(address string) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Connection failed", err)
+			fmt.Println("Connection failed:", err)
 			continue
 		}
 
-		go handleConnection(conn)
+		go handleConnection(conn, broker)
 	}
 }
 
-func handleConnection(conn net.Conn) {
-
-	defer conn.Close()
-	_, err := fmt.Fprintf(conn, "Please enter your username: ")
-	if err != nil {
-		fmt.Println("Error writing username prompt", err)
-	}
-
+func handleConnection(conn net.Conn, broker *Broker) {
 	reader := bufio.NewReader(conn)
+	writer := bufio.NewWriter(conn)
+
+	writer.WriteString("Please enter your username: ")
+	writer.Flush()
 	name, err := reader.ReadString('\n')
 	if err != nil {
+		conn.Close()
 		fmt.Println("Error reading username", err)
+		return
 	}
 
 	name = strings.TrimSpace(name)
-	fmt.Printf("%s has joined!\n", name)
-	fmt.Fprintf(conn, "Welcome to the chat!\n")
 
-	var client Client = Client{
-		Conn: conn,
-		Name: name,
+	client := &Client{
+		Conn:     conn,
+		Name:     name,
+		Outbound: make(chan string),
 	}
 
-	fmt.Println("New client: ", client.Name)
+	broker.Register <- client
+
+	go func() {
+		defer conn.Close()
+		for msg := range client.Outbound {
+			_, err := fmt.Fprintln(client.Conn, msg)
+			if err != nil {
+				return
+			}
+		}
+	}()
 
 	for {
 		msg, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("%s disconnected.\n", name)
-			return
+			break
 		}
-		fmt.Printf("[%s]: %s", name, msg)
+		select {
+		case broker.Broadcast <- fmt.Sprintf("[%s]: %s", client.Name, strings.TrimSpace(msg)):
+		default:
+			fmt.Println("Blocked! Could not send to broker")
+		}
 	}
+
+	broker.Unregister <- client
+	conn.Close()
 }
