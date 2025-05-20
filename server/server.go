@@ -1,4 +1,4 @@
-package chat
+package server
 
 import (
 	"bufio"
@@ -8,7 +8,6 @@ import (
 )
 
 func StartServer(address string) {
-
 	fmt.Printf("Starting chat server on %s ...\n", address)
 
 	listener, err := net.Listen("tcp", address)
@@ -30,6 +29,7 @@ func StartServer(address string) {
 }
 
 func handleConnection(conn net.Conn) {
+
 	defer conn.Close()
 	_, err := fmt.Fprintf(conn, "Please enter your username: ")
 	if err != nil {
@@ -45,6 +45,14 @@ func handleConnection(conn net.Conn) {
 	name = strings.TrimSpace(name)
 	fmt.Printf("%s has joined!\n", name)
 	fmt.Fprintf(conn, "Welcome to the chat!\n")
+
+	var client Client = Client{
+		Conn: conn,
+		Name: name,
+	}
+
+	fmt.Println("New client: ", client.Name)
+
 	for {
 		msg, err := reader.ReadString('\n')
 		if err != nil {
