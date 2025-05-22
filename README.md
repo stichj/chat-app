@@ -14,7 +14,7 @@ Welcome to my first Go project! I have implemented a real-time chat app with a t
 1. Clone the repository 
 ```bash
 git clone https://github.com/stichj/chat-app.git
-cd tcp-chat-go
+cd chat-app
 ```
 2. Build and run with Docker
     
