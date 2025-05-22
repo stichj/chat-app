@@ -20,6 +20,7 @@ func StartClient(address string) {
 	fmt.Println("Connecting to", address, "...")
 	if err != nil {
 		fmt.Printf("Error connecting to server %s via tcp: %s\n", address, err)
+		os.Exit(1)
 	}
 	defer conn.Close()
 	fmt.Println("Connected to chat server")
