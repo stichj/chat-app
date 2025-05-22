@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  chat-server:
+    build:
+      context: ./chat-server
+    ports:
+      - "9000:9000"
+    networks:
+      - "chatnet"
+  chat-client:
+    build:
+      context: ./chat-client
+    stdin_open: true
+    tty: true
+    depends_on:
+      - chat-server
+    networks:
+      - "chatnet"
+
+networks:
+  chatnet:
