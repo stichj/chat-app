@@ -3,5 +3,5 @@ package main
 import "chat-client/client"
 
 func main() {
-	client.StartClient("localhost:9000")
+	client.StartClient("chat-server:9000")
 }
