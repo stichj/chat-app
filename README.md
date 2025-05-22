@@ -13,7 +13,7 @@ Welcome to my first Go project! I have implemented a real-time chat app with a t
 
 1. Clone the repository 
 ```bash
-git clone https://github.com/your-username/tcp-chat-go.git
+git clone https://github.com/stichj/chat-app.git
 cd tcp-chat-go
 ```
 2. Build and run with Docker
@@ -37,6 +37,10 @@ After launching:
 - Start chatting with others!
 - Type `/quit` or `/q` or press `Ctrl+C` to leave the chat gracefully.
 
+## 🐳 Docker
+- Start more clients in new Terminal windows with `docker-compose run chat-client`
+- Run `docker-compose down` to shut down all containers
+
 ## 📚 Future Improvements
 
 - Add authentication or user presence
@@ -45,4 +49,4 @@ After launching:
 
 ## 📄 License
 
-MIT License – see LICENSE file for details.
+MIT License – see `LICENSE` file for details.
